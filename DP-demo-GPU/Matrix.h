@@ -39,6 +39,8 @@ public:
 	void mulNum(double x);
 	double mulSum(Matrix* b);
 	double sum(int length);
+	void sumColumn(Matrix* out);
+	void sumRow(Matrix* out);
 
 };
 

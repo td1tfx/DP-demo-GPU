@@ -91,23 +91,50 @@ void Matrix::dot(Matrix* b, Matrix* out, bool a_trans, bool b_trans) {
 // 		std::cout << "Matrix dot error!! the widths of b and out are not march!" << std::endl;
 // 	}
 
-	CBLAS_TRANSPOSE a_trans_t = (CBLAS_TRANSPOSE)(CblasNoTrans + a_trans);
-	CBLAS_TRANSPOSE b_trans_t = (CBLAS_TRANSPOSE)(CblasNoTrans + b_trans);
+	if (a_trans == 0) {
+		if (b_trans == 0) {
+			cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+				m_row_num, b->width(), m_column_num, 1,
+				m_data, m_column_num, b->data(), b->width(),
+				0, out->data(), out->width());
+		}
+		else {
+			cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
+				m_row_num, b->hight(), m_column_num, 1,
+				m_data, m_column_num, b->data(), b->width(),
+				0, out->data(), out->width());
+		}	
+	}
+	else {
+		if (b_trans == 0) {
+			cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
+				m_column_num, b->width(), m_row_num, 1,
+				m_data, m_column_num, b->data(), b->width(),
+				0, out->data(), out->width());
+		}
+		else {
+			cblas_dgemm(CblasRowMajor, CblasTrans, CblasTrans,
+				m_column_num, b->hight(), m_row_num, 1,
+				m_data, m_column_num, b->data(), b->width(),
+				0, out->data(), out->width());
+		}
+	}
 
-	cblas_dgemm(CblasRowMajor, (CBLAS_TRANSPOSE)(CblasNoTrans + a_trans), (CBLAS_TRANSPOSE)(CblasNoTrans + b_trans),
-		m_row_num,b->width(),m_column_num,1,
-		m_data, m_column_num,b->data(),b->width(),
-		0,out->data(),out->width());
 }
 
 void Matrix::elementMul(Matrix* b, Matrix* out) {
 	if (b->size() != m_size || m_size != out->size()) {
 		std::cout << "Matrix multiply error!! the size of b or out is not march!" << std::endl;
 	}
-	return cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, 
-		1, b->size(), m_size, 1,
-		m_data, m_size, b->data(),b->size(),
-		0,out->data(),out->size());
+// 	return cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, 
+// 		1, b->size(), m_size, 1,
+// 		m_data, m_size, b->data(),b->size(),
+// 		0,out->data(),out->size());
+	for (int i = 0; i < m_size; i++)
+	{
+		out->data()[i] = m_data[i] * b->data()[i];
+	}
+
 }
 
 double Matrix::mulSum(Matrix* b) {
@@ -123,6 +150,21 @@ void Matrix::mulNum(double b) {
 
 double Matrix::sum(int length) {
 	return cblas_dasum(m_size, m_data, 1);
+}
+
+void Matrix::sumColumn(Matrix* out) {
+	for (int i = 0; i < out->size(); i++) {
+		out->data()[i] = cblas_dasum(out->size(), &m_data[i*m_column_num], 1);
+	}
+}
+
+void Matrix::sumRow(Matrix* out) {
+	for (int i = 0; i < out->size(); i++) {
+		out->data()[i] = 0;
+		for (int j = 0; j < m_row_num; j++) {
+			out->data()[i] += m_data[j*m_column_num + i];
+		}
+	}
 }
 
 void Matrix::sigmoid() {
