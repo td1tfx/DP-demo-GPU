@@ -1,5 +1,5 @@
 #pragma once
-
+#include <iostream>
 #include <stdlib.h>
 #include <cblas.h>
 
@@ -23,13 +23,18 @@ public:
 
 	void init(double num);
 	void randomInit(double max_num);
+	void printf();
 
 	double& getData(int co_num, int r_num);
+	Matrix* copy();
 
 	//function
-	Matrix* copy();
+	void copyto(Matrix* out);
+	void copyDatafrom(double* in_data);
 	void add(Matrix* b);
 	void addb(Matrix* b, Matrix* out, int batch_num);	//matrix add b vector
+	void dot(Matrix* b, Matrix* out);
+	void sigmoid();
 	double sum();
 
 };

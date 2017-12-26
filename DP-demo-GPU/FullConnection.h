@@ -17,7 +17,7 @@ private:
 
 public:
 	FullConnection();
-	FullConnection(int in_num_t, int out_num_t, int batch_num_t, double lr = 0.01);
+	FullConnection(int in_num_t, int out_num_t, int batch_num_t, double lr);
 	~FullConnection();
 
 	Matrix* forward(Matrix* in_data);

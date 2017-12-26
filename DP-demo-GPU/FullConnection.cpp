@@ -35,12 +35,15 @@ FullConnection::~FullConnection()
 }
 
 Matrix* FullConnection::forward(Matrix* in_data) {
-	m_in_data = in_data->copy();
-	cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
-		m_batch_num, m_out_num, m_in_num, 1,
-		m_in_data->data(), m_in_num, m_w->data(), m_out_num,
-		0, m_out_data->data(), m_batch_num);
-
+	in_data->copyto(m_in_data);
+// 	cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+// 		m_batch_num, m_out_num, m_in_num, 1,
+// 		m_in_data->data(), m_in_num, m_w->data(), m_out_num,
+// 		0, m_out_data->data(), m_batch_num);
+	in_data->dot(m_w, m_out_data);
+	m_out_data->addb(m_b, m_out_data,m_batch_num);
+	m_out_data->sigmoid();
+	return m_out_data;
 }
 
 
