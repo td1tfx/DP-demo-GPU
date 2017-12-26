@@ -35,6 +35,7 @@ public:
 	void addb(Matrix* b, Matrix* out, int batch_num);	//matrix add b vector
 	void dot(Matrix* b, Matrix* out);
 	void sigmoid();
+	double mul(Matrix* b);
 	double sum();
 
 };

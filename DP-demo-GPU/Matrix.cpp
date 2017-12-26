@@ -96,6 +96,13 @@ void Matrix::dot(Matrix* b, Matrix* out) {
 		0,out->data(),out->width());
 }
 
+double Matrix::mul(Matrix* b) {
+	if (b->size() != m_size) {
+		std::cout << "Matrix multiply error!! the size of b is not march!" << std::endl;
+	}
+	return cblas_ddot(m_size, b->data(), 1, b->data(), 1);
+}
+
 double Matrix::sum() {
 	return cblas_dasum(m_size, m_data, 1);
 }

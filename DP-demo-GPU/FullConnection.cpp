@@ -19,6 +19,7 @@ FullConnection::FullConnection(int in_num_t, int out_num_t, int batch_num_t, dou
 	m_w = new Matrix(m_out_num, m_in_num);
 	m_w->randomInit(1);
 	m_b = new Matrix(m_out_num, 1);
+	m_loss = new Matrix(m_out_num, m_batch_num);
 }
 
 
@@ -36,14 +37,19 @@ FullConnection::~FullConnection()
 
 Matrix* FullConnection::forward(Matrix* in_data) {
 	in_data->copyto(m_in_data);
-// 	cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
-// 		m_batch_num, m_out_num, m_in_num, 1,
-// 		m_in_data->data(), m_in_num, m_w->data(), m_out_num,
-// 		0, m_out_data->data(), m_batch_num);
 	in_data->dot(m_w, m_out_data);
 	m_out_data->addb(m_b, m_out_data,m_batch_num);
 	m_out_data->sigmoid();
 	return m_out_data;
 }
 
+double FullConnection::squareLoss(Matrix* bench_data) {
+	if (m_loss->size() != bench_data->size()) {
+		std::cout << "SquareLoss error!! the size of output_data and bench_data is not euqal!" << std::endl;
+	}
+	for (int i = 0; i < m_loss->size(); i++) {
+		m_loss->data()[i] = m_out_data->data()[i] - bench_data->data()[i];
+	}
+	return	m_loss->mul(m_loss)/m_loss->size()/2;
+}
 

@@ -14,6 +14,7 @@ private:
 	Matrix* m_out_data;
 	Matrix* m_w;
 	Matrix* m_b;
+	Matrix* m_loss;
 
 public:
 	FullConnection();
@@ -21,5 +22,8 @@ public:
 	~FullConnection();
 
 	Matrix* forward(Matrix* in_data);
+	Matrix* getLossMatrix() { return m_loss; };
+	double squareLoss(Matrix* bench_data);
+
 };
 

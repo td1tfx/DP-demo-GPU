@@ -39,6 +39,10 @@ int main()
 
 	std::cout << "output:" << std::endl;
 	out_data->printf();
+	std::cout << "mse = " << fc2.squareLoss(&bench_data) << std::endl;
+	std::cout << "LossMatrix:" << std::endl;
+	fc2.getLossMatrix()->printf();
+
 
 	system("pause");
 	return 0;
