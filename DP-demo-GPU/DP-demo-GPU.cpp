@@ -33,16 +33,27 @@ int main()
 	bench_data.printf();
 
 	Matrix* out_data;
-	out_data = fc.forward(&in_data);
-	out_data = fc1.forward(out_data);
-	out_data = fc2.forward(out_data);
+	double mse = 1;
+	int run_num = 0;
+	Matrix* loss_data;
+	while (mse >= 0.001 && run_num < 10) {
+		out_data = fc.forward(&in_data);
+		out_data = fc1.forward(out_data);
+		out_data = fc2.forward(out_data);
+		mse = fc2.squareLoss(&bench_data);
 
-	std::cout << "output:" << std::endl;
-	out_data->printf();
-	std::cout << "mse = " << fc2.squareLoss(&bench_data) << std::endl;
-	std::cout << "LossMatrix:" << std::endl;
-	fc2.getLossMatrix()->printf();
+		//std::cout << "output:" << std::endl;
+		//out_data->printf();
+		std::cout << "mse = " << mse << std::endl;
+		//std::cout << "LossMatrix:" << std::endl;
+		//fc2.getLossMatrix()->printf();
 
+		loss_data = fc2.getLossMatrix();
+		loss_data = fc2.backward(loss_data);
+		loss_data = fc1.backward(loss_data);
+		loss_data = fc.backward(loss_data);
+		run_num++;
+	}
 
 	system("pause");
 	return 0;

@@ -20,6 +20,10 @@ FullConnection::FullConnection(int in_num_t, int out_num_t, int batch_num_t, dou
 	m_w->randomInit(1);
 	m_b = new Matrix(m_out_num, 1);
 	m_loss = new Matrix(m_out_num, m_batch_num);
+	m_residual_z = new Matrix(m_out_num, m_batch_num);
+	m_residual_x = new Matrix(m_in_num, m_batch_num);
+	m_grad_w = new Matrix(m_out_num, m_in_num);
+	m_grad_b = new Matrix(m_out_num, 1);
 }
 
 
@@ -33,12 +37,40 @@ FullConnection::~FullConnection()
 		delete m_out_data;
 		m_out_data = NULL;
 	}
+	if (m_w != NULL) {
+		delete m_w;
+		m_w = NULL;
+	}
+	if (m_b != NULL) {
+		delete m_b;
+		m_b = NULL;
+	}
+	if (m_loss != NULL) {
+		delete m_loss;
+		m_loss = NULL;
+	}
+	if (m_residual_x != NULL) {
+		delete m_residual_x;
+		m_residual_x = NULL;
+	}
+	if (m_residual_z != NULL) {
+		delete m_residual_z;
+		m_residual_z = NULL;
+	}
+	if (m_grad_w != NULL) {
+		delete m_grad_w;
+		m_grad_w = NULL;
+	}
+	if (m_grad_b != NULL) {
+		delete m_grad_b;
+		m_grad_b = NULL;
+	}
 }
 
 Matrix* FullConnection::forward(Matrix* in_data) {
 	in_data->copyto(m_in_data);
 	in_data->dot(m_w, m_out_data);
-	m_out_data->addb(m_b, m_out_data,m_batch_num);
+	m_out_data->addb(m_b, m_out_data, m_batch_num);
 	m_out_data->sigmoid();
 	return m_out_data;
 }
@@ -50,6 +82,21 @@ double FullConnection::squareLoss(Matrix* bench_data) {
 	for (int i = 0; i < m_loss->size(); i++) {
 		m_loss->data()[i] = m_out_data->data()[i] - bench_data->data()[i];
 	}
-	return	m_loss->mul(m_loss)/m_loss->size()/2;
+	return	m_loss->mulSum(m_loss)/m_loss->size()/2;
 }
 
+Matrix* FullConnection::backward(Matrix* loss) {
+	loss->elementMul(m_out_data, m_residual_z);
+	Matrix loss_t(loss->width(), loss->hight(), 1);
+	m_out_data->add(&loss_t,-1);
+	m_residual_z->elementMul(&loss_t, m_residual_z);
+	m_in_data->dot(m_residual_z, m_grad_w, 1, 0);
+	Matrix vector_t(m_residual_z->hight(), 1, 1);
+	vector_t.dot(m_residual_z, m_grad_b);
+	m_grad_w->mulNum(m_lr);
+	m_grad_w->add(m_w, -1);
+	m_grad_b->mulNum(m_lr);
+	m_grad_b->add(m_b, -1);
+	m_residual_z->dot(m_w, m_residual_x);	
+	return m_residual_x;
+}

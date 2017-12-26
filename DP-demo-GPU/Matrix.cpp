@@ -9,13 +9,13 @@ Matrix::Matrix()
 	Matrix(3, 3);
 }
 
-Matrix::Matrix(int column_num, int row_num)
+Matrix::Matrix(int column_num, int row_num, double init_num)
 {
 	m_row_num = row_num;
 	m_column_num = column_num;
 	m_size = m_row_num * m_column_num;
 	m_data = new double[m_size];
-	init(0);
+	init(init_num);
 }
 
 
@@ -70,8 +70,8 @@ void Matrix::printf() {
 	}
 }
 
-void Matrix::add(Matrix* b) {
-	cblas_daxpy(m_size, 1, m_data, 1, b->data(), 1);
+void Matrix::add(Matrix* b, double Alpha) {
+	cblas_daxpy(m_size, Alpha, m_data, 1, b->data(), 1);
 }
 
 void Matrix::addb(Matrix* b, Matrix* out, int batch_num) {
@@ -80,30 +80,48 @@ void Matrix::addb(Matrix* b, Matrix* out, int batch_num) {
 	}
 }
 
-void Matrix::dot(Matrix* b, Matrix* out) {
-	if (m_column_num != b->hight()) {
-		std::cout << "Matrix dot error!! the hight of b is not march!" << std::endl;
-	}
-	if (m_row_num != out->hight()) {
-		std::cout << "Matrix dot error!! the hight of out is not march!" << std::endl;
-	}
-	if (b->width() != out->width()) {
-		std::cout << "Matrix dot error!! the width of b and out is not march!" << std::endl;
-	}
-	cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+void Matrix::dot(Matrix* b, Matrix* out, bool a_trans, bool b_trans) {
+// 	if (m_column_num != b->hight()) {
+// 		std::cout << "Matrix dot error!! the hight of b is not march!" << std::endl;
+// 	}
+// 	if (m_row_num != out->hight()) {
+// 		std::cout << "Matrix dot error!! the hight of out is not march!" << std::endl;
+// 	}
+// 	if (b->width() != out->width()) {
+// 		std::cout << "Matrix dot error!! the widths of b and out are not march!" << std::endl;
+// 	}
+
+	CBLAS_TRANSPOSE a_trans_t = (CBLAS_TRANSPOSE)(CblasNoTrans + a_trans);
+	CBLAS_TRANSPOSE b_trans_t = (CBLAS_TRANSPOSE)(CblasNoTrans + b_trans);
+
+	cblas_dgemm(CblasRowMajor, (CBLAS_TRANSPOSE)(CblasNoTrans + a_trans), (CBLAS_TRANSPOSE)(CblasNoTrans + b_trans),
 		m_row_num,b->width(),m_column_num,1,
 		m_data, m_column_num,b->data(),b->width(),
 		0,out->data(),out->width());
 }
 
-double Matrix::mul(Matrix* b) {
+void Matrix::elementMul(Matrix* b, Matrix* out) {
+	if (b->size() != m_size || m_size != out->size()) {
+		std::cout << "Matrix multiply error!! the size of b or out is not march!" << std::endl;
+	}
+	return cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, 
+		1, b->size(), m_size, 1,
+		m_data, m_size, b->data(),b->size(),
+		0,out->data(),out->size());
+}
+
+double Matrix::mulSum(Matrix* b) {
 	if (b->size() != m_size) {
-		std::cout << "Matrix multiply error!! the size of b is not march!" << std::endl;
+		std::cout << "Matrix multiply sum error!! the size of b is not march!" << std::endl;
 	}
 	return cblas_ddot(m_size, b->data(), 1, b->data(), 1);
 }
 
-double Matrix::sum() {
+void Matrix::mulNum(double b) {
+	cblas_dscal(m_size, b, m_data, 1);
+}
+
+double Matrix::sum(int length) {
 	return cblas_dasum(m_size, m_data, 1);
 }
 

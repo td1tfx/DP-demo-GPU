@@ -13,7 +13,7 @@ private:
 
 public:
 	Matrix();
-	Matrix( int column_num, int raw_num);	//row is the first order, default init is 0;
+	Matrix( int column_num, int raw_num, double init_num = 0);	//row is the first order, default init is 0;
 	~Matrix();
 	
 	double* data() { return m_data; }
@@ -31,12 +31,14 @@ public:
 	//function
 	void copyto(Matrix* out);
 	void copyDatafrom(double* in_data);
-	void add(Matrix* b);
+	void add(Matrix* b, double Alpha = 0);
 	void addb(Matrix* b, Matrix* out, int batch_num);	//matrix add b vector
-	void dot(Matrix* b, Matrix* out);
+	void dot(Matrix* b, Matrix* out, bool a_trans = 0, bool b_trans = 0);
 	void sigmoid();
-	double mul(Matrix* b);
-	double sum();
+	void elementMul(Matrix* b, Matrix* out);
+	void mulNum(double x);
+	double mulSum(Matrix* b);
+	double sum(int length);
 
 };
 
