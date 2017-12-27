@@ -87,10 +87,16 @@ double FullConnection::squareLoss(Matrix* bench_data) {
 
 Matrix* FullConnection::backward(Matrix* loss) {
 	loss->elementMul(m_out_data, m_residual_z);
+// 	loss->printf();
+// 	m_out_data->printf();
+// 	m_residual_z->printf();
 	Matrix loss_t(loss->width(), loss->hight(), 1);
 	m_out_data->add(&loss_t,-1);
 	m_residual_z->elementMul(&loss_t, m_residual_z);
 	m_in_data->dot(m_residual_z, m_grad_w, 1, 0);
+// 	m_in_data->printf();
+// 	m_residual_z->printf();
+// 	m_grad_w->printf();
 	m_residual_z->sumRow(m_grad_b);
 // 	m_residual_z->printf();
 // 	m_grad_b->printf();
